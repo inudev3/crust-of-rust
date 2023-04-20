@@ -3,7 +3,7 @@ use std::ops::{Deref, DerefMut};
 use crate::cell::Cell;
 use crate::RefCell::RefState::Unshared;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone)] //Cell은 get()시에 참조가 아닌 Copy를 제공
 enum RefState {
     Unshared,
     Shared(usize),
@@ -28,7 +28,6 @@ impl<T> RefCell<T> {
             Unshared => {
                 self.state.set(Shared(1));
                 Some(Ref{refcell:self})
-                // Some(unsafe { &*self.value.get() })
             }
             Shared(n) => {
                 self.state.set(Shared(n + 1)); //thread-unsafe!!
@@ -57,8 +56,7 @@ impl<T> Drop for Ref<'_, T> {
         match self.refcell.state.get() {
             Exclusive | Unshared => unreachable!(), //공유참조일 때 exclusive 일 수 없음
             Shared(1) => self.refcell.state.set(Unshared),
-            Shared(n) if n > 1 => self.refcell.state.set(Shared(n - 1)),
-            _ => {}
+            Shared(n) => self.refcell.state.set(Shared(n - 1)),
         }
     }
 }
@@ -93,8 +91,7 @@ impl<T> Drop for RefMut<'_, T> {
         use RefState::*;
         match self.refcell.state.get() {
             Shared(_) | Unshared => unreachable!(), //공유참조일 때 exclusive 일 수 없음
-            Unshared => self.refcell.state.set(Unshared),
-            _=>{}
+            Exclusive => self.refcell.state.set(Unshared),
         }
     }
 }
