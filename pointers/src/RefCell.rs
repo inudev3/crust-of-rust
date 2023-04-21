@@ -24,7 +24,7 @@ impl<T> RefCell<T> {
     }
     pub fn borrow(&self) -> Option<Ref<'_, T>> {
         use RefState::*;
-        match self.state {
+        match self.state.get() {
             Unshared => {
                 self.state.set(Shared(1));
                 Some(Ref{refcell:self})
@@ -37,7 +37,7 @@ impl<T> RefCell<T> {
         }
     }
     pub fn borrow_mut(&self) -> Option<RefMut<'_, T>> {
-        if self.state == RefState::Unshared {
+        if let Unshared = self.state.get() {
             self.state.set(RefState::Exclusive);
             Some(RefMut{refcell:self})
         } else {
@@ -80,7 +80,8 @@ impl<T> Deref for RefMut<'_, T> {
     }
 }
 impl<T> DerefMut for RefMut<'_, T> {
-    fn deref_mut(&mut self) -> &Self::Target {
+
+    fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe {&mut *self.refcell.value.get()}
     }
 }

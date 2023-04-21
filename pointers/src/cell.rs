@@ -18,15 +18,15 @@ impl<T> Cell<T>{
 #[cfg(test)]
 mod test{
     use super::Cell;
-    #[test]
-    fn bad(){
-        use std::sync::Arc;
-        let x = Arc::new(Cell::new(42));
-        let x1 = x.clone();
-        std::thread::spawn(||{x1.set(43)});
-        let x2 = x.clone();
-        std::thread::spawn(||{x2.set(44)});
-    }
+    // #[test]
+    // fn bad(){
+    //     use std::sync::Arc;
+    //     let x = Arc::new(Cell::new(42));
+    //     let x1 = x.clone();
+    //     std::thread::spawn(||{x1.set(43)});
+    //     let x2 = x.clone();
+    //     std::thread::spawn(||{x2.set(44)});
+    // }
     // #[test]
     // fn bad2(){
     //     let x  = Cell::new(String::from("hi"));
